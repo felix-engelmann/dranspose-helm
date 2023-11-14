@@ -1,13 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Namespace }}-controller
+  name: redis
   labels:
     {{- include "daq-dranspose.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   ports:
-    - port: 8000
-      name: controller
+    - port: 6379
+      name: redis
   selector:
+    app.kubernetes.io/component: redis
     {{- include "daq-dranspose.selectorLabels" . | nindent 4 }}
