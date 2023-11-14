@@ -1,15 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "daq-dranspose.fullname" . }}
+  name: {{ .Release.Namespace }}-controller
   labels:
     {{- include "daq-dranspose.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+    - port: 8000
+      name: controller
   selector:
     {{- include "daq-dranspose.selectorLabels" . | nindent 4 }}

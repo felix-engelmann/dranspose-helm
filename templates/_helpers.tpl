@@ -60,3 +60,12 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{/*
+Returns extraEnv variable for DAQ container
+*/}}
+{{- define "daq-dranspose.extraEnv" -}}
+- name: REDIS_HOST
+  value: "redis"
+{{- end }}
