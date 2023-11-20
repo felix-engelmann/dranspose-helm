@@ -30,17 +30,17 @@ spec:
       containers:
       - name: {{ .Chart.Name }}-controller
         image: "harbor.maxiv.lu.se/daq/dranspose:main"
-        command: ["uvicorn"]
+        command: ["dranspose"]
         env:
           - name: BEAMLINE
             value: {{ .Values.global.beamline | quote }}
 {{ include "daq-dranspose.extraEnv" . | indent 10 }}
         args:
-          - "dranspose.controller:app"
+          - "controller"
           - "--host"
           - "0.0.0.0"
         imagePullPolicy: Always
         ports:
-          - name: http
-            containerPort: 8000
+          - name: control
+            containerPort: 5000
             protocol: TCP

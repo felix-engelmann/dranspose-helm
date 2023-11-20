@@ -20,4 +20,4 @@ spec:
               service:
                 name: {{ .Release.Namespace }}-controller
                 port:
-                  name: controller
+                  name: control
