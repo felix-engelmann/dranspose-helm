@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/component: worker
     {{- include "daq-dranspose.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: 8
   selector:
     matchLabels:
       app.kubernetes.io/component: worker

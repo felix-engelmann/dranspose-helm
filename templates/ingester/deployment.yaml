@@ -13,8 +13,11 @@ spec:
       {{- include "daq-dranspose.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        k8s.v1.cni.cncf.io/networks: >-
+          [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
+          "interface": "purple0" }]
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -38,7 +41,7 @@ spec:
           - "-c"
           - "StreamingSingleIngester"
           - "-u"
-          - "tcp://b-daq-node-2:10232"
+          - "tcp://p-daq-cn-2:10232"
         env:
           - name: BEAMLINE
             value: {{ .Values.global.beamline | quote }}

@@ -86,10 +86,7 @@ redis:
 
     containerSecurityContext:
       enabled: false
-      runAsUser: 91120
-      runAsGroup: 91116
-
     podSecurityContext:
-      fsGroup: 91116
+      enabled: false
 
 
