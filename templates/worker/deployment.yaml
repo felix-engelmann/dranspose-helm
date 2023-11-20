@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "daq-dranspose.fullname" . }}-worker
+  labels:
+    app.kubernetes.io/component: worker
+    {{- include "daq-dranspose.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      {{- include "daq-dranspose.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: worker
+        {{- include "daq-dranspose.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.tcp_wmem
+            value: "4096 87380 16777216"
+          - name: net.netfilter.nf_conntrack_tcp_timeout_close_wait
+            value: "3600"
+      containers:
+      - name: {{ .Chart.Name }}-worker
+        image: "harbor.maxiv.lu.se/daq/dranspose:main"
+        command: ["dranspose"]
+        args:
+          - "worker"
+        env:
+          - name: BEAMLINE
+            value: {{ .Values.global.beamline | quote }}
+{{ include "daq-dranspose.extraEnv" . | indent 10 }}
+        imagePullPolicy: Always

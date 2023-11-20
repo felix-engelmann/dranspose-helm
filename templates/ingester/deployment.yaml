@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "daq-dranspose.fullname" . }}-ingester-eiger
+  labels:
+    app.kubernetes.io/component: ingester-eiger
+    {{- include "daq-dranspose.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: ingester-eiger
+      {{- include "daq-dranspose.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: ingester-eiger
+        {{- include "daq-dranspose.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.tcp_wmem
+            value: "4096 87380 16777216"
+          - name: net.netfilter.nf_conntrack_tcp_timeout_close_wait
+            value: "3600"
+      containers:
+      - name: {{ .Chart.Name }}-ingester-eiger
+        image: "harbor.maxiv.lu.se/daq/dranspose:main"
+        command: ["dranspose"]
+        args:
+          - "ingester"
+          - "--name"
+          - "ingest-eiger"
+          - "-c"
+          - "StreamingSingleIngester"
+          - "-u"
+          - "tcp://b-daq-node-2:10232"
+        env:
+          - name: BEAMLINE
+            value: {{ .Values.global.beamline | quote }}
+          - name: WORKER_URL
+            value: "tcp://dranspose-bench-ingester-eiger:10010"
+{{ include "daq-dranspose.extraEnv" . | indent 10 }}
+        imagePullPolicy: Always
+        ports:
+          - name: workers
+            containerPort: 10010
+            protocol: TCP
