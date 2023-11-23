@@ -1,28 +1,31 @@
+{{- range $module, $config := .Values.ingesters }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "daq-dranspose.fullname" . }}-ingester-eiger
+  name: {{ $.Release.Name }}-ingester-{{ $module }}
   labels:
-    app.kubernetes.io/component: ingester-eiger
-    {{- include "daq-dranspose.labels" . | nindent 4 }}
+    app.kubernetes.io/componentgroup: ingesters
+    app.kubernetes.io/component: ingester-{{ $module }}
+    {{- include "daq-dranspose.labels" $ | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/component: ingester-eiger
-      {{- include "daq-dranspose.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ingester-{{ $module }}
+      {{- include "daq-dranspose.selectorLabels" $ | nindent 6 }}
   template:
     metadata:
       annotations:
         k8s.v1.cni.cncf.io/networks: >-
           [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
           "interface": "purple0" }]
-      {{- with .Values.podAnnotations }}
+      {{- with $.Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/component: ingester-eiger
-        {{- include "daq-dranspose.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ingester-{{ $module }}
+        {{- include "daq-dranspose.selectorLabels" $ | nindent 8 }}
     spec:
       securityContext:
         sysctls:
@@ -31,25 +34,46 @@ spec:
           - name: net.netfilter.nf_conntrack_tcp_timeout_close_wait
             value: "3600"
       containers:
-      - name: {{ .Chart.Name }}-ingester-eiger
+      - name: {{ $.Chart.Name }}-ingester-{{ $module }}
         image: "harbor.maxiv.lu.se/daq/dranspose:main"
         command: ["dranspose"]
         args:
           - "ingester"
           - "--name"
-          - "ingest-eiger"
+          - "{{ $module }}"
           - "-c"
           - "StreamingSingleIngester"
           - "-u"
-          - "tcp://p-daq-cn-2:10232"
-        env:
+          - "{{ $config.connect_url }}"
+        env: # purple cn2
           - name: BEAMLINE
-            value: {{ .Values.global.beamline | quote }}
-          - name: WORKER_URL
-            value: "tcp://dranspose-bench-ingester-eiger:10010"
-{{ include "daq-dranspose.extraEnv" . | indent 10 }}
+            value: {{ $.Values.global.beamline | quote }}
+          - name: INGESTER_URL
+            value: "tcp://{{ $.Release.Namespace }}-ingester-{{ $module }}:10010"
+          - name: DUMP_PATH
+            value: "/data/staff/dummymax/dumps/ingest_dump_{{ $module }}.pkls"
+{{ include "daq-dranspose.extraEnv" $ | indent 10 }}
         imagePullPolicy: Always
         ports:
           - name: workers
             containerPort: 10010
             protocol: TCP
+        resources:
+          limits:
+            daq.maxiv.lu.se/egress-bandwidth: 1k
+            daq.maxiv.lu.se/ingress-bandwidth: 4k
+            intel.com/mellanox_sriov_netdevice: '1'
+          requests:
+            daq.maxiv.lu.se/egress-bandwidth: 1k
+            daq.maxiv.lu.se/ingress-bandwidth: 4k
+            intel.com/mellanox_sriov_netdevice: '1'
+        volumeMounts:
+          - name: daq-volume-staff
+            mountPath: {{ printf "/data/staff/%s" $.Values.global.beamline }}
+            readOnly: false
+      volumes:
+      - name: daq-volume-staff
+        hostPath:
+          path: {{ printf "/gpfs/offline1/staff/%s" $.Values.global.beamline }}
+          type: Directory
+{{ end }}

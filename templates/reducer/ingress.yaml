@@ -1,0 +1,23 @@
+{{- $svcPort := .Values.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-reducer
+  labels:
+    {{- include "daq-dranspose.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 128m
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  rules:
+    - host: {{ .Release.Namespace }}-reducer.{{ .Values.ingress.suffix }}
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Release.Namespace }}-reducer
+                port:
+                  name: control

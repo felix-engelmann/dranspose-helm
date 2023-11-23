@@ -15,6 +15,11 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+ingesters:
+  eiger:
+    connect_url: "tcp://172.18.10.102:10232"
+  alba:
+    connect_url: "tcp://172.18.10.102:10233"
 
 imagePullSecrets: []
 nameOverride: ""
