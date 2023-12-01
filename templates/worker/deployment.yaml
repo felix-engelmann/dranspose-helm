@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "daq-dranspose.fullname" . }}-worker
+  name: {{ $.Release.Name }}-worker
   labels:
     app.kubernetes.io/component: worker
     {{- include "daq-dranspose.labels" . | nindent 4 }}
 spec:
-  replicas: 8
+  replicas: {{ .Values.workers }}
   selector:
     matchLabels:
       app.kubernetes.io/component: worker
@@ -29,10 +29,12 @@ spec:
             value: "3600"
       containers:
       - name: {{ .Chart.Name }}-worker
-        image: "harbor.maxiv.lu.se/daq/dranspose:main"
+        image: {{ .Values.science_image | default "harbor.maxiv.lu.se/daq/dranspose:main" | quote }}
         command: ["dranspose"]
         args:
           - "worker"
+          - "-c"
+          - {{ .Values.worker.class | quote }}
         env:
           - name: BEAMLINE
             value: {{ .Values.global.beamline | quote }}

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "daq-dranspose.fullname" . }}-reducer
+  name: {{ $.Release.Name }}-reducer
   labels:
     app.kubernetes.io/component: reducer
     {{- include "daq-dranspose.labels" . | nindent 4 }}
@@ -29,18 +29,25 @@ spec:
             value: "3600"
       containers:
       - name: {{ .Chart.Name }}-reducer
-        image: "harbor.maxiv.lu.se/daq/dranspose:main"
+        image: {{ .Values.science_image | default "harbor.maxiv.lu.se/daq/dranspose:main" | quote }}
         command: ["dranspose"]
         env:
           - name: BEAMLINE
             value: {{ .Values.global.beamline | quote }}
+          - name: REDUCER_URL
+            value: "tcp://{{ .Release.Namespace }}-reducer:10010"
 {{ include "daq-dranspose.extraEnv" . | indent 10 }}
         args:
           - "reducer"
           - "--host"
           - "0.0.0.0"
+          - "-c"
+          - {{ .Values.reducer.class | quote }}
         imagePullPolicy: Always
         ports:
           - name: control
             containerPort: 5000
+            protocol: TCP
+          - name: workers
+            containerPort: 10010
             protocol: TCP

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Namespace }}-reducer
+  name: {{ .Release.Namespace }}-reducer-web
   labels:
     {{- include "daq-dranspose.labels" . | nindent 4 }}
 spec:

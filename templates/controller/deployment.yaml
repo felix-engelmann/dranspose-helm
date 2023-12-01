@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "daq-dranspose.fullname" . }}-controller
+  name: {{ $.Release.Name }}-controller
   labels:
     app.kubernetes.io/component: controller
     {{- include "daq-dranspose.labels" . | nindent 4 }}

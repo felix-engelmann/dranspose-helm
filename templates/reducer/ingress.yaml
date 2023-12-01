@@ -1,4 +1,3 @@
-{{- $svcPort := .Values.service.port -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -18,6 +17,6 @@ spec:
           - pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Release.Namespace }}-reducer
+                name: {{ .Release.Namespace }}-reducer-web
                 port:
                   name: control

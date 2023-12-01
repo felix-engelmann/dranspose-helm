@@ -67,7 +67,7 @@ Returns extraEnv variable for DAQ container
 */}}
 {{- define "daq-dranspose.extraEnv" -}}
 - name: REDIS_URL
-  value: "redis://daq-dranspose-redis-master:6379/0"
+  value: "redis://{{ .Release.Name }}-redis-master:6379/0"
 - name: LOG_LEVEL
-  value: "DEBUG"
+  value: {{ .Values.log_level }}
 {{- end }}

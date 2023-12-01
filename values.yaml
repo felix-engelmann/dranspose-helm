@@ -9,17 +9,14 @@ global:
 
 replicaCount: 1
 
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+log_level: "INFO"
 
-ingesters:
-  eiger:
-    connect_url: "tcp://172.18.10.102:10232"
-  alba:
-    connect_url: "tcp://172.18.10.102:10233"
+workers: 8
+#ingesters:
+#  eiger:
+#    connect_url: "tcp://172.18.10.102:10232"
+#  alba:
+#    connect_url: "tcp://172.18.10.102:10233"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -46,10 +43,6 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
 
 ingress:
   enabled: true

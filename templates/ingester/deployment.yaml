@@ -42,7 +42,7 @@ spec:
           - "--name"
           - "{{ $module }}"
           - "-c"
-          - "StreamingSingleIngester"
+          - {{ $config.ingester_class | default "StreamingSingleIngester" | quote }}
           - "-u"
           - "{{ $config.connect_url }}"
         env: # purple cn2
@@ -50,8 +50,10 @@ spec:
             value: {{ $.Values.global.beamline | quote }}
           - name: INGESTER_URL
             value: "tcp://{{ $.Release.Namespace }}-ingester-{{ $module }}:10010"
+          {{ if $.Values.global.dump_prefix }}
           - name: DUMP_PATH
-            value: "/data/staff/dummymax/dumps/ingest_dump_{{ $module }}.pkls"
+            value: "{{ $.Values.global.dump_prefix }}{{ $module }}.pkls"
+          {{ end }}
 {{ include "daq-dranspose.extraEnv" $ | indent 10 }}
         imagePullPolicy: Always
         ports:
@@ -67,6 +69,7 @@ spec:
             daq.maxiv.lu.se/egress-bandwidth: 1k
             daq.maxiv.lu.se/ingress-bandwidth: 4k
             intel.com/mellanox_sriov_netdevice: '1'
+      {{ if $.Values.global.dump_prefix }}
         volumeMounts:
           - name: daq-volume-staff
             mountPath: {{ printf "/data/staff/%s" $.Values.global.beamline }}
@@ -76,4 +79,5 @@ spec:
         hostPath:
           path: {{ printf "/gpfs/offline1/staff/%s" $.Values.global.beamline }}
           type: Directory
+      {{ end}}
 {{ end }}
