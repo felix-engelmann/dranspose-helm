@@ -41,8 +41,10 @@ spec:
           - "reducer"
           - "--host"
           - "0.0.0.0"
+          {{ if .Values.reducer }}
           - "-c"
           - {{ .Values.reducer.class | quote }}
+          {{ end }}
         imagePullPolicy: Always
         ports:
           - name: control

@@ -33,8 +33,10 @@ spec:
         command: ["dranspose"]
         args:
           - "worker"
+          {{ if .Values.worker }}
           - "-c"
           - {{ .Values.worker.class | quote }}
+          {{ end }}
         env:
           - name: BEAMLINE
             value: {{ .Values.global.beamline | quote }}
