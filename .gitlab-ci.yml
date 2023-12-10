@@ -1,5 +1,6 @@
 variables:
   BRANCHES_TO_INCLUDE: "main"
+  HELM_CHART_REPO: "harbor.maxiv.lu.se/daq/charts"
 
 include:
   - project: 'kits-maxiv/kubernetes/k8s-gitlab-ci'
