@@ -1,0 +1,7 @@
+variables:
+  BRANCHES_TO_INCLUDE: "main"
+
+include:
+  - project: 'kits-maxiv/kubernetes/k8s-gitlab-ci'
+    ref: "master"
+    file: 'Helm-package.gitlab-ci.yml'
