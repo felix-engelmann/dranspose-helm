@@ -44,7 +44,7 @@ spec:
           - "--name"
           - "{{ $module }}"
           - "-c"
-          - {{ $config.ingester_class | default "StreamingSingleIngester" | quote }}
+          - {{ $config.ingester_class | default "ZmqPullSingleIngester" | quote }}
           - "-u"
           - "{{ $config.connect_url }}"
         env: # purple cn2
