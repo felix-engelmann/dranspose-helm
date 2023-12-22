@@ -54,7 +54,7 @@ spec:
         args:
           - "ingester"
           - "--name"
-          - "{{ $module }}"
+          - "{{ $config.stream | default $module }}"
           - "-c"
           - {{ $config.ingester_class | default "ZmqPullSingleIngester" | quote }}
           - "-u"
