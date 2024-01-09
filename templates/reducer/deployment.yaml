@@ -53,3 +53,30 @@ spec:
           - name: workers
             containerPort: 10010
             protocol: TCP
+      {{ if .Values.reducer }}
+      {{ if .Values.reducer.filesystem }}
+        volumeMounts:
+          - name: daq-volume-staff
+            mountPath: {{ printf "/data/staff/%s" $.Values.global.beamline }}
+            readOnly: false
+          - name: daq-volume-visitors
+            mountPath: {{ printf "/data/visitors/%s" $.Values.global.beamline }}
+            readOnly: false
+          - name: daq-volume-proprietary
+            mountPath: {{ printf "/data/proprietary/%s" $.Values.global.beamline }}
+            readOnly: false
+      volumes:
+      - name: daq-volume-staff
+        hostPath:
+          path: {{ printf "/gpfs/offline1/staff/%s" $.Values.global.beamline }}
+          type: Directory
+      - name: daq-volume-visitors
+        hostPath:
+          path: {{ printf "/gpfs/offline1/visitors/%s" $.Values.global.beamline }}
+          type: Directory
+      - name: daq-volume-proprietary
+        hostPath:
+          path: {{ printf "/gpfs/offline1/proprietary/%s" $.Values.global.beamline }}
+          type: Directory
+      {{ end }}
+      {{ end }}
