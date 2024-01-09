@@ -58,7 +58,7 @@ spec:
           - "-c"
           - {{ $config.ingester_class | default "ZmqPullSingleIngester" | quote }}
           - "-u"
-          - "{{ $config.connect_url }}"
+          - "{{ $config.upstream_url }}"
         env: # purple cn2
           - name: BEAMLINE
             value: {{ $.Values.global.beamline | quote }}

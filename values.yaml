@@ -12,9 +12,9 @@ log_level: "INFO"
 workers: 8
 #ingesters:
 #  eiger:
-#    connect_url: "tcp://172.18.10.102:10232"
+#    upstream_url: "tcp://172.18.10.102:10232"
 #  alba:
-#    connect_url: "tcp://172.18.10.102:10233"
+#    upstream_url: "tcp://172.18.10.102:10233"
 
 
 ingress:
