@@ -1,0 +1,27 @@
+{{- range $module, $config := .Values.ingesters }}
+{{ if $config.ingester_app }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $.Release.Name }}-ingester-{{ $module }}
+  labels:
+    {{- include "daq-dranspose.labels" $ | nindent 4 }}
+  {{- with $.Values.ingress.annotations }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 128m
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  rules:
+    - host: {{ $.Release.Namespace }}-ingester-{{ $module }}.{{ $.Values.ingress.suffix }}
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $.Release.Namespace }}-ingester-{{ $module }}-control
+                port:
+                  name: control
+{{end}}
+{{end}}

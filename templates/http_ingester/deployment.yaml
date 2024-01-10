@@ -1,6 +1,6 @@
 {{- range $module, $config := .Values.ingesters }}
 ---
-{{ if not $config.ingester_app }}
+{{ if $config.ingester_app }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,11 +18,8 @@ spec:
       {{- include "daq-dranspose.selectorLabels" $ | nindent 6 }}
   template:
     metadata:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: >-
-          [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
-          "interface": "purple0" }]
       {{- with $.Values.podAnnotations }}
+      annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -30,18 +27,6 @@ spec:
         app.kubernetes.io/componentgroup: ingesters
         {{- include "daq-dranspose.selectorLabels" $ | nindent 8 }}
     spec:
-      {{ if $config.affinity }}
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app.daq.pipeline/component: {{ $config.affinity.component }}
-                  app.kubernetes.io/instance: {{ $config.affinity.namespace }}
-              topologyKey: kubernetes.io/hostname
-              namespaces:
-                - {{ $config.affinity.namespace }}
-      {{ end }}
       securityContext:
         sysctls:
           - name: net.ipv4.tcp_wmem
@@ -53,18 +38,14 @@ spec:
         image: "harbor.maxiv.lu.se/daq/dranspose:main"
         command: ["dranspose"]
         args:
-          - "ingester"
+          - "http_ingester"
           - "--name"
           - "{{ $config.stream | default $module }}"
           - "-c"
-          - {{ $config.ingester_class | default "ZmqPullSingleIngester" | quote }}
-          - "-u"
-          - "{{ $config.upstream_url }}"
-        env: # purple cn2
+          - {{ $config.ingester_app | default "dranspose.ingesters.http_sardana:app" | quote }}
+        env:
           - name: BEAMLINE
             value: {{ $.Values.global.beamline | quote }}
-          - name: INGESTER_URL
-            value: "tcp://{{ $.Release.Namespace }}-ingester-{{ $module }}:10010"
           {{ if $.Values.global.dump_prefix }}
           - name: DUMP_PATH
             value: "{{ $.Values.global.dump_prefix }}{{ $module }}.pkls"
@@ -72,18 +53,12 @@ spec:
 {{ include "daq-dranspose.extraEnv" $ | indent 10 }}
         imagePullPolicy: Always
         ports:
+          - name: control
+            containerPort: 5000
+            protocol: TCP
           - name: workers
             containerPort: 10010
             protocol: TCP
-        resources:
-          limits:
-            daq.maxiv.lu.se/egress-bandwidth: 1k
-            daq.maxiv.lu.se/ingress-bandwidth: 4k
-            intel.com/mellanox_sriov_netdevice: '1'
-          requests:
-            daq.maxiv.lu.se/egress-bandwidth: 1k
-            daq.maxiv.lu.se/ingress-bandwidth: 4k
-            intel.com/mellanox_sriov_netdevice: '1'
       {{ if $.Values.global.dump_prefix }}
         volumeMounts:
           - name: daq-volume-staff
@@ -95,5 +70,5 @@ spec:
           path: {{ printf "/gpfs/offline1/staff/%s" $.Values.global.beamline }}
           type: Directory
       {{ end}}
-{{ end }}
-{{ end }}
+{{end}}
+{{end}}
