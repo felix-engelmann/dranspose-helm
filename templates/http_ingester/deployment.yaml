@@ -27,6 +27,18 @@ spec:
         app.kubernetes.io/componentgroup: ingesters
         {{- include "daq-dranspose.selectorLabels" $ | nindent 8 }}
     spec:
+      {{ if $config.affinity }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.daq.pipeline/component: {{ $config.affinity.component }}
+                  app.kubernetes.io/instance: {{ $config.affinity.namespace }}
+              topologyKey: kubernetes.io/hostname
+              namespaces:
+                - {{ $config.affinity.namespace }}
+      {{ end }}
       securityContext:
         sysctls:
           - name: net.ipv4.tcp_wmem
@@ -46,6 +58,8 @@ spec:
         env:
           - name: BEAMLINE
             value: {{ $.Values.global.beamline | quote }}
+          - name: INGESTER_URL
+            value: "tcp://{{ $.Release.Namespace }}-ingester-{{ $module }}:10010"
           {{ if $.Values.global.dump_prefix }}
           - name: DUMP_PATH
             value: "{{ $.Values.global.dump_prefix }}{{ $module }}.pkls"
