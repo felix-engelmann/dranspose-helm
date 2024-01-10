@@ -84,7 +84,6 @@ spec:
             daq.maxiv.lu.se/egress-bandwidth: 1k
             daq.maxiv.lu.se/ingress-bandwidth: 4k
             intel.com/mellanox_sriov_netdevice: '1'
-      {{ if $.Values.global.dump_prefix }}
         volumeMounts:
           - name: daq-volume-staff
             mountPath: {{ printf "/data/staff/%s" $.Values.global.beamline }}
@@ -94,6 +93,5 @@ spec:
         hostPath:
           path: {{ printf "/gpfs/offline1/staff/%s" $.Values.global.beamline }}
           type: Directory
-      {{ end}}
 {{ end }}
 {{ end }}

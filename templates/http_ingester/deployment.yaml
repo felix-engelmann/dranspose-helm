@@ -73,7 +73,6 @@ spec:
           - name: workers
             containerPort: 10010
             protocol: TCP
-      {{ if $.Values.global.dump_prefix }}
         volumeMounts:
           - name: daq-volume-staff
             mountPath: {{ printf "/data/staff/%s" $.Values.global.beamline }}
@@ -83,6 +82,5 @@ spec:
         hostPath:
           path: {{ printf "/gpfs/offline1/staff/%s" $.Values.global.beamline }}
           type: Directory
-      {{ end}}
 {{end}}
 {{end}}
