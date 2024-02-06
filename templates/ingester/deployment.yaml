@@ -19,9 +19,10 @@ spec:
   template:
     metadata:
       annotations:
-        k8s.v1.cni.cncf.io/networks: >-
-          [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
-          "interface": "purple0" }]
+      # no purple needed
+      #  k8s.v1.cni.cncf.io/networks: >-
+      #    [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
+      #    "interface": "purple0" }]
       {{- with $.Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
