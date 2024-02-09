@@ -1,0 +1,55 @@
+{{- range $module, $config := .Values.extra_workers }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-worker-{{ $module }}
+  labels:
+    app.kubernetes.io/component: worker-{{ $module }}
+    {{- include "daq-dranspose.labels" $ | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker-{{ $module }}
+      {{- include "daq-dranspose.selectorLabels" $ | nindent 6 }}
+  template:
+    metadata:
+      {{- with $.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: worker-{{ $module }}
+        {{- include "daq-dranspose.selectorLabels" $ | nindent 8 }}
+    spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.tcp_wmem
+            value: "4096 87380 16777216"
+          - name: net.netfilter.nf_conntrack_tcp_timeout_close_wait
+            value: "3600"
+      containers:
+      - name: {{ $.Chart.Name }}-worker-{{ $module }}
+        image: {{ $config.image | default $.Values.science_image| default "harbor.maxiv.lu.se/daq/dranspose:main" | quote  }}
+        command: ["dranspose"]
+        args:
+          - "worker"
+          {{ if $config.class }}
+          - "-c"
+          - {{ $config.class | quote }}
+          {{ end }}
+          {{ if $config.name }}
+          - "-n"
+          - {{ $config.name | quote }}
+          {{ end }}
+        env:
+          - name: BEAMLINE
+            value: {{ $.Values.global.beamline | quote }}
+          {{ if $config.tags }}
+          - name: WORKER_TAGS
+            value: {{ $config.tags | quote }}
+          {{ end }}
+{{ include "daq-dranspose.extraEnv" $ | indent 10 }}
+        imagePullPolicy: Always
+{{end}}

@@ -19,10 +19,11 @@ spec:
   template:
     metadata:
       annotations:
-      # no purple needed
-      #  k8s.v1.cni.cncf.io/networks: >-
-      #    [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
-      #    "interface": "purple0" }]
+      {{ if $config.purple }}
+        k8s.v1.cni.cncf.io/networks: >-
+          [{ "name": "purple-sriov-dhcp", "namespace": "daq-network",
+          "interface": "purple0" }]
+      {{ end }}
       {{- with $.Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -76,15 +77,17 @@ spec:
           - name: workers
             containerPort: 10010
             protocol: TCP
+        {{ if $config.purple }}
         resources:
           limits:
             daq.maxiv.lu.se/egress-bandwidth: 1k
-            daq.maxiv.lu.se/ingress-bandwidth: 4k
+            daq.maxiv.lu.se/ingress-bandwidth: 1k
             intel.com/mellanox_sriov_netdevice: '1'
           requests:
             daq.maxiv.lu.se/egress-bandwidth: 1k
-            daq.maxiv.lu.se/ingress-bandwidth: 4k
+            daq.maxiv.lu.se/ingress-bandwidth: 1k
             intel.com/mellanox_sriov_netdevice: '1'
+        {{ end }}
         volumeMounts:
           - name: daq-volume-staff
             mountPath: {{ printf "/data/staff/%s" $.Values.global.beamline }}

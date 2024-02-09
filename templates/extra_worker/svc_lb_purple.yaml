@@ -1,0 +1,24 @@
+{{- range $module, $config := .Values.extra_workers }}
+{{- if $config.repub -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%s-purple-egress" $.Release.Namespace $module }}
+  labels:
+    dns-defined-ingress-ip-resolver.maxiv.lu.se/hostname: {{ $config.repub.host }}
+    {{- include "daq-dranspose.labels" $ | nindent 4 }}
+  annotations:
+    keepalived-operator.redhat-cop.io/keepalivedgroup: keepalived-operator/purple-egress
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: repub
+      port: {{ $config.repub.port }}
+      protocol: TCP
+  selector:
+    app.kubernetes.io/component: worker-{{ $module }}
+    {{- include "daq-dranspose.selectorLabels" $ | nindent 4 }}
+{{- end }}
+{{ end }}
